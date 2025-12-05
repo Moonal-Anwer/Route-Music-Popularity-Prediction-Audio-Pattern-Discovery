@@ -212,14 +212,14 @@ with col_pred:
 
         # 6. Prediction
         pred_xgb = xgb_model.predict(df_scaled_xgb)[0]
-        pred_mlp = mlp_model.predict(df_mlp_input)[0][0]  # Keras returns 2D array
+        pred_mlp = mlp_model.predict(df_mlp_input)[0][0]  
 
         # Calculate mean prediction
-        prediction = (pred_xgb + pred_mlp)
-        # 7. Display Results
+        prediction = (pred_xgb + pred_mlp) /2
+        # Display Results
         st.divider()
 
-        # Big Metric
+       
 
         st.metric(label="Average Prediction", value=f"{prediction:.1f} / 100")
 
@@ -275,7 +275,7 @@ def create_sparse_matrix(_df, _scaler, _cat_vectorizers, _feature_names):
     num_cols = _scaler.feature_names_in_
     X_num = _scaler.transform(_df[num_cols])
 
-    sparse_blocks = [sp.csr_matrix(X_num)]  # start with numericals
+    sparse_blocks = [sp.csr_matrix(X_num)]  
 
     for col, vec in _cat_vectorizers.items():
         col_data = _df[col].astype(str).values
@@ -287,21 +287,21 @@ def create_sparse_matrix(_df, _scaler, _cat_vectorizers, _feature_names):
     return X_final.tocsr()
 
 
-# Create the matrix
+
 X_sparse = create_sparse_matrix(df, scaler, cat_vectorizers, feature_names)
 
 # ---------------------------------
 # 3. PRE-CALCULATE CLUSTERS & PCA
 # ---------------------------------
 if "cluster" not in df.columns:
-    # Predict clusters on the sparse matrix (Fast)
+    
     df["cluster"] = kmeans.predict(X_sparse)
 
 if "pca_x" not in df.columns:
     pca_x_list, pca_y_list = [], []
     batch_size = 100
 
-    # Process in chunks of 100 rows
+    # process in chunks of 100 rows
     for i in range(0, X_sparse.shape[0], batch_size):
         X_batch = X_sparse[i:i + batch_size].toarray()
         coords = pca.transform(X_batch)
@@ -340,7 +340,7 @@ fig = px.scatter(
     opacity=0.6
 )
 
-# Highlight selected track (Big Red Star)
+
 fig.add_scatter(
     x=[df.loc[track_idx, "pca_x"]],
     y=[df.loc[track_idx, "pca_y"]],
@@ -587,4 +587,5 @@ if st.button("Create Playlist in Spotify"):
 
     st.success("playlist is readyyyyy")
     st.markdown(f"[Open in Spotify]({playlist['external_urls']['spotify']})")
+
 
